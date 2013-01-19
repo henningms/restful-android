@@ -5,9 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+import no.henning.restful.model.Model;
+
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Named
+public @interface BelongsTo
 {
-	String value();
+	Class<? extends Model> value();
 }
