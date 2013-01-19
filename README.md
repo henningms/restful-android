@@ -32,12 +32,12 @@ public class User extends ModelWithActions<UserActions>
 
 UserActions.java
 
-@BelongsTo(User.class)
-public interface UserActions
-{
-	@GET("{date}.json")
-	public void getByDate(@Named("date") String date);
-}
+	@BelongsTo(User.class)
+	public interface UserActions
+	{
+		@GET("{date}.json")
+		public void getByDate(@Named("date") String date);
+	}
 
 UserService.java
 
