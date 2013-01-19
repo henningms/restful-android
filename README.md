@@ -14,21 +14,21 @@ User.java [model]
 
 	@UsesRestService(UserService.class)
 	@Authenticate(UserAuthentication.class)
-public class User extends ModelWithActions<UserActions>
-{
-	@ID
-	private Long id;
-	
-	private String name;
-	
-	@Named("created_at")
-	private String createdAt;
-	
-	public User()
+	public class User extends ModelWithActions<UserActions>
 	{
-		actions = enable(UserActions.class);
+		@ID
+		private Long id;
+		
+		private String name;
+		
+		@Named("created_at")
+		private String createdAt;
+		
+		public User()
+		{
+			actions = enable(UserActions.class);
+		}
 	}
-}
 
 UserActions.java
 
