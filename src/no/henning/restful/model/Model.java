@@ -1,8 +1,13 @@
 package no.henning.restful.model;
 
+import java.lang.reflect.Field;
+
 import org.apache.http.client.methods.HttpUriRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.util.Log;
+import no.henning.restful.converter.json.JsonParser;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
@@ -12,6 +17,11 @@ import no.henning.restful.model.interfaces.DefaultRestActions;
 public class Model implements DefaultRestActions
 {
 
+	public Model()
+	{
+		
+	}
+	
 	@Override
 	public void get()
 	{
@@ -30,6 +40,36 @@ public class Model implements DefaultRestActions
 				{
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());
+				
+					
+					try
+					{
+						JSONObject jsonObject = new JSONObject(response.getResponse());
+						Model model = JsonParser.parse(jsonObject, this.getClass());
+						
+						for (Field field : model.getClass().getDeclaredFields())
+						{
+							field.setAccessible(true);
+							
+							Log.d("restful", "" + field.getName() + " : " + field.get(model));
+						}
+					}
+					catch (JSONException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					catch (IllegalArgumentException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					catch (IllegalAccessException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				}
 			});
 	}
