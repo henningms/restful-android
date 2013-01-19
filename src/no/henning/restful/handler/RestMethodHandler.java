@@ -33,9 +33,13 @@ public class RestMethodHandler implements InvocationHandler
 			throws Throwable
 	{
 		
+		Log.d("restful", "RestMethodHandler: Getting Model associated with " + method.getName());
 		Class<? extends Model> model = GenericHelper.getModelFromProxyMethod(method);
 		
+		Log.d("restful", "RestMethodHandler: Getting absolute path");
 		String path = ProxyHelper.getAbsolutePathFromProxyMethod(method, arguments);
+		
+		Log.d("restful", "RestMethodHandler: Getting what HTTP verb to use");
 		String httpVerb = HttpHelper.getHttpRequestVerbFromProxyMethod(method);
 		
 		return "LOL";

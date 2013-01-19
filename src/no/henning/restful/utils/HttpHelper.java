@@ -1,6 +1,7 @@
 package no.henning.restful.utils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -152,6 +153,7 @@ public class HttpHelper
 		
 		if (basicAuthentication == null) return null;
 		
+		Log.d("restful", "getBasicAuthenticationFromModel: Getting Auth string");
 		return getBasicAuthenticationFromAuthenticationClass(basicAuthentication);
 	}
 
@@ -165,8 +167,13 @@ public class HttpHelper
 	public static String getBasicAuthenticationFromAuthenticationClass(Class<? extends BasicAuthentication> authenticationClass)
 	{
 		try
-		{
-			return (String) authenticationClass.getMethod("to", null).invoke(authenticationClass, null);
+		{			
+			Field encodedStringField = authenticationClass.getSuperclass().getDeclaredField("encodedString");
+			
+			// Make it accessible
+			encodedStringField.setAccessible(true);
+			
+			return ((String) encodedStringField.get(null)).trim();
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -178,16 +185,12 @@ public class HttpHelper
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (InvocationTargetException e)
+		catch (NoSuchFieldException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (NoSuchMethodException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		
 		return null;
 	}

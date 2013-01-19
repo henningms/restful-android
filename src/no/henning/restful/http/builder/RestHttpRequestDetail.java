@@ -78,12 +78,12 @@ public class RestHttpRequestDetail
 	{
 		if (modelClass == null) return;
 		
-		//String authString = HttpHelper.getBasicAuthenticationFromModel(modelClass);
+		String authString = HttpHelper.getBasicAuthenticationFromModel(modelClass);
 		
-		//if (authString == null) return;
+		if (authString == null) return;
 		
-		//Log.d("restful", "Auth: Basic " + authString);
-		request.setHeader("Authorization", "Basic aGVubmluZ21zQGdtYWlsLmNvbTp0ZXN0aW5nMTIz");
+		Log.d("restful", "addBasicAuthentication: This request has been set to include authentication..");
+		request.setHeader("Authorization", "Basic " + authString);
 	}
 	
 	public String getRequestUrl()

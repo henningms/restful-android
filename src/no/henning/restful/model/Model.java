@@ -22,7 +22,7 @@ public class Model implements DefaultRestActions
 		Log.d("restful", "URI: " + request.getURI());
 		Log.d("restful", "METHOD: " + request.getMethod());
 		
-		HttpRestClient.request(detail.buildRequest(), new HttpRestClientResponseCallback()
+		HttpRestClient.request(request, new HttpRestClientResponseCallback()
 			{
 				
 				@Override

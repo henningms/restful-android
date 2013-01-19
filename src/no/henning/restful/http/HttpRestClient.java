@@ -40,9 +40,7 @@ public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, RestHttpResp
 	protected RestHttpResponse doInBackground(HttpUriRequest... requests)
 	{
 		try
-		{		
-			//requests[0].addHeader("Authorization", "Basic aGVubmluZ21zQGdtYWlsLmNvbTp0ZXN0aW5nMTIz");
-			//client.getCredentialsProvider().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("henningms@gmail.com", "testing123"));
+		{
 			HttpResponse response = client.execute(requests[0]);
 			String responseAsString = EntityUtils
 					.toString(response.getEntity());
