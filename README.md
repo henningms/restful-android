@@ -41,7 +41,7 @@ UserActions.java
 
 UserService.java
 
-	@Url("https://api-staging.quicklog.no/v1/")
+	@Url("https://example.com/api")
 	public class UserService extends RestService
 	{
 		
