@@ -3,6 +3,8 @@ package no.henning.restful.utils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -14,6 +16,7 @@ import java.util.regex.Pattern;
 
 import android.util.Log;
 
+import no.henning.restful.callback.Callback;
 import no.henning.restful.model.Model;
 import no.henning.restful.model.annotation.Named;
 import no.henning.restful.service.annotation.DELETE;
@@ -26,19 +29,22 @@ public class ProxyHelper
 	private static final Pattern PATH_PARAMETERS = Pattern
 			.compile("\\{([a-z_-]*)\\}");
 
-	public static String getAbsolutePathFromProxyMethod(Method method, Object[] arguments)
+	public static String getAbsolutePathFromProxyMethod(Method method,
+			Object[] arguments)
 	{
-		Class<? extends Model> model = GenericHelper.getModelFromProxyMethod(method);
+		Class<? extends Model> model = GenericHelper
+				.getModelFromProxyMethod(method);
 		String modelAbsolutePath = HttpHelper.getAbsolutePathFromModel(model);
 		String proxyMethodPath = getPathFromProxyMethod(method, arguments);
-		
+
 		// Automatically appends "/" to the path if it's missing
-		// TODO: Is this really what we want? I dunno at this point (18/01/2013 23:37)
-		modelAbsolutePath = HttpHelper.fixServicePath(modelAbsolutePath);
-		
+		// TODO: Is this really what we want? I dunno at this point (18/01/2013
+		// 23:37)
+		// modelAbsolutePath = HttpHelper.fixServicePath(modelAbsolutePath);
+
 		return String.format("%s%s", modelAbsolutePath, proxyMethodPath);
 	}
-	
+
 	public static String getPathFromProxyMethod(Method method,
 			Object[] arguments)
 	{
@@ -120,5 +126,46 @@ public class ProxyHelper
 		}
 
 		return temporaryPath;
+	}
+
+	public static String getProxyQueryPath(Method method, Object[] arguments)
+	{
+		String path = getPathFromHttpVerbAnnotation(method);
+
+		String queryPath = "?";
+
+		Map<String, Object> namedValues = getProxyPathNamedParametersWithValues(
+				method, arguments);
+
+		for (Map.Entry<String, Object> entry : namedValues.entrySet())
+		{
+			if (path.contains("{" + entry.getKey() + "}")) continue;
+
+			queryPath += entry.getKey() + "=" + entry.getValue() + "&";
+		}
+
+		return queryPath.substring(0, queryPath.length() - 1);
+	}
+
+	/**
+	 * getCallbackType
+	 * 
+	 * If there's a Callback<?> in the method, it should always be the last
+	 * argument right?..
+	 * 
+	 * @param arguments
+	 * @return
+	 */
+	public static Class<?> getCallbackType(Callback<?> callback)
+	{
+		Type[] types = callback.getClass().getGenericInterfaces();
+
+		return GenericHelper
+				.getUnderlyingGenericType((ParameterizedType) types[0]);
+	}
+
+	public static Callback<?> getCallbackArgument(Object[] arguments)
+	{
+		return (Callback<?>) arguments[arguments.length - 1];
 	}
 }

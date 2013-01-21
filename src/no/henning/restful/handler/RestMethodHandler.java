@@ -2,11 +2,19 @@ package no.henning.restful.handler;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import no.henning.restful.callback.Callback;
+import no.henning.restful.callback.CallbackWrapper;
+import no.henning.restful.converter.json.JsonParser;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
@@ -41,6 +49,31 @@ public class RestMethodHandler implements InvocationHandler
 		
 		Log.d("restful", "RestMethodHandler: Getting what HTTP verb to use");
 		String httpVerb = HttpHelper.getHttpRequestVerbFromProxyMethod(method);
+		
+		String queryPath = ProxyHelper.getProxyQueryPath(method, arguments);
+		Log.d("restful", "RestMethodHandler: Full path: " + path + queryPath);
+		
+		final Callback<?> callback = ProxyHelper.getCallbackArgument(arguments);
+		final Type callbackType = ProxyHelper.getCallbackType(callback);
+		
+		
+		HttpUriRequest httpRequest = new RestHttpRequestDetail(model, path, httpVerb, null).buildRequest();
+		HttpRestClient.request(httpRequest, new HttpRestClientResponseCallback()
+			{
+				
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				@Override
+				public void onDone(RestHttpResponse response)
+				{
+					// TODO Auto-generated method stub
+					Log.d("restful", "Response: " + response.getResponse());
+					
+					Object t = JsonParser.parse(response.getResponse(), (Class<?>)callbackType);
+					
+					new CallbackWrapper(callback).success(t);
+					
+				}
+			});
 		
 		return "LOL";
 	}

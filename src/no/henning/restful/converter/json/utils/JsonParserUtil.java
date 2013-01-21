@@ -1,11 +1,18 @@
 package no.henning.restful.converter.json.utils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+
+import android.util.Log;
+
+import no.henning.restful.converter.json.JsonParser;
 import no.henning.restful.model.annotation.Ignore;
 import no.henning.restful.model.annotation.Named;
+import no.henning.restful.utils.GenericHelper;
 
 public class JsonParserUtil
 {
@@ -36,5 +43,57 @@ public class JsonParserUtil
 		}
 		
 		return listOfFields;
+	}
+	
+	public static boolean castJsonValue(Field field, Object object, Object value) throws IllegalArgumentException, IllegalAccessException
+	{
+		Class<?> fieldClass = field.getType();
+		
+		if (fieldClass.isInstance(value))
+		{
+			Log.d("restful", "castJsonValue: Field can be cast directly!");
+			field.set(object, fieldClass.cast(value));
+		}
+		else if (isNumber(fieldClass))
+		{
+			Log.d("restful", "castJsonValue: Field is a type of Number..");
+			Object newValue = JsonCasting.getAsNumber(fieldClass, value);
+			
+			Log.d("restful", "castJsonValue: Number value: " + newValue);
+			field.set(object, newValue);
+		}
+		
+		return false;
+	}
+	
+	public static boolean isNumber(Class<?> clazz)
+	{
+		return Number.class.isAssignableFrom(clazz);
+	}
+	
+	public static boolean isJsonArray(Object value)
+	{
+		return value instanceof JSONArray;
+	}
+	
+	public static boolean castJsonArrayValue(Field field, Object object, Object value) throws IllegalArgumentException, IllegalAccessException
+	{
+		Class<?> fieldClass = field.getType();
+		
+		Object jsonValue = null;
+		
+		if (GenericHelper.isArray(fieldClass))
+		{
+			jsonValue = JsonParser.parseArray((JSONArray)value, GenericHelper.getUnderlyingArrayType(fieldClass));
+		}
+		else if (GenericHelper.isCollection(fieldClass))
+		{
+			ParameterizedType type = (ParameterizedType)field.getGenericType();
+			jsonValue = JsonParser.parseCollection((JSONArray)value, GenericHelper.getUnderlyingGenericType(type));
+		}
+		
+		field.set(object, jsonValue);
+		
+		return jsonValue == null;
 	}
 }
