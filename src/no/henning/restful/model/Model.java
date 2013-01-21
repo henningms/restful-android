@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.util.Log;
 import no.henning.restful.callback.Callback;
 import no.henning.restful.converter.json.JsonParser;
+import no.henning.restful.converter.json.JsonWriter;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
@@ -25,12 +26,59 @@ public class Model implements DefaultRestActions
 	}
 
 	@Override
-	public void get(final Callback<? extends Model> callback)
+	public void get(final Callback<Model> callback)
 	{
-		// TODO Auto-generated method stub
-		RestHttpRequestDetail detail = new RestHttpRequestDetail(this, "GET");
+		performRequest("GET", this, callback);
+	}
+
+	@Override
+	public void get()
+	{
+		get(null);
+	}
+
+	@Override
+	public void save(Callback<Model> callback)
+	{
+		performRequest("POST", this, callback);
+	}
+	
+	@Override
+	public void save()
+	{
+		save(null);
+	}
+	
+	@Override
+	public void update(Callback<Model> callback)
+	{
+		performRequest("PUT", this, callback);
+	}
+	
+	@Override
+	public void update()
+	{
+		update(null);
+	}
+
+	@Override
+	public void delete(Callback<Model> callback)
+	{
+		performRequest("DELETE", this, callback);
+	}
+	@Override
+	public void delete()
+	{
+		delete(null);
+	}
+	
+	private void performRequest(String httpVerb, Model body, final Callback<Model> callback)
+	{
+		RestHttpRequestDetail detail = new RestHttpRequestDetail(this, httpVerb);
 
 		HttpUriRequest request = detail.buildRequest();
+		
+		final Model that = this;
 
 		HttpRestClient.request(request, new HttpRestClientResponseCallback()
 			{
@@ -46,36 +94,9 @@ public class Model implements DefaultRestActions
 					
 					if (callback == null) return;
 					
-					callback.onSuccess(null);
+					callback.onSuccess(that);
 				}
 			});
-	}
-
-	@Override
-	public void get()
-	{
-		get(null);
-	}
-
-	@Override
-	public void save()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void update()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void delete()
-	{
-		// TODO Auto-generated method stub
-
 	}
 
 	private void updateValues(String json)
@@ -88,5 +109,10 @@ public class Model implements DefaultRestActions
 	{
 		ModelUtil.replaceValues(fromModel, this);
 	}
-
+	
+	@Override
+	public String toString()
+	{
+		return JsonWriter.from(this).toString();
+	}
 }

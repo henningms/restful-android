@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import no.henning.restful.callback.Callback;
 import no.henning.restful.callback.CallbackWrapper;
 import no.henning.restful.converter.json.JsonParser;
+import no.henning.restful.converter.json.JsonWriter;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
@@ -53,11 +54,15 @@ public class RestMethodHandler implements InvocationHandler
 		String queryPath = ProxyHelper.getProxyQueryPath(method, arguments);
 		Log.d("restful", "RestMethodHandler: Full path: " + path + queryPath);
 		
+		String absolutePath = path + queryPath;
+		
+		Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
+		String entityAsJsonString = JsonWriter.from(entityObject).toString();
+		
 		final Callback<?> callback = ProxyHelper.getCallbackArgument(arguments);
 		final Type callbackType = ProxyHelper.getCallbackType(callback);
 		
-		
-		HttpUriRequest httpRequest = new RestHttpRequestDetail(model, path, httpVerb, null).buildRequest();
+		HttpUriRequest httpRequest = new RestHttpRequestDetail(model, absolutePath, httpVerb, entityAsJsonString).buildRequest();
 		HttpRestClient.request(httpRequest, new HttpRestClientResponseCallback()
 			{
 				

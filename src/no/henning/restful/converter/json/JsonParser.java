@@ -40,12 +40,7 @@ public class JsonParser
 		}
 		return array;
 	}
-
-	public static <T> T parse(JSONArray jsonArray, Class<T> type)
-	{
-		return null;
-	}
-
+	
 	public static <T> T parse(JSONObject jsonObject, Class<T> type)
 	{
 		if (jsonObject == null) return null;

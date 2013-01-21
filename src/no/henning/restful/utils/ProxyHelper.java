@@ -18,6 +18,7 @@ import android.util.Log;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.model.Model;
+import no.henning.restful.model.annotation.Entity;
 import no.henning.restful.model.annotation.Named;
 import no.henning.restful.service.annotation.DELETE;
 import no.henning.restful.service.annotation.GET;
@@ -167,5 +168,22 @@ public class ProxyHelper
 	public static Callback<?> getCallbackArgument(Object[] arguments)
 	{
 		return (Callback<?>) arguments[arguments.length - 1];
+	}
+	
+	public static Object getEntityObjectFromProxyMethod(Method method, Object[] arguments)
+	{
+		Annotation[][] annotations = method.getParameterAnnotations();
+		
+		for (int i = 0; i < annotations.length; i++)
+		{
+			for (Annotation annotation : annotations[i])
+			{
+				if (!(annotation instanceof Entity)) continue;
+				
+				return arguments[i];
+			}
+		}
+		
+		return null;
 	}
 }
