@@ -89,7 +89,7 @@ public class JsonParserUtil
 		else if (GenericHelper.isCollection(fieldClass))
 		{
 			ParameterizedType type = (ParameterizedType)field.getGenericType();
-			jsonValue = JsonParser.parseCollection((JSONArray)value, GenericHelper.getUnderlyingGenericType(type));
+			jsonValue = JsonParser.parseCollection((JSONArray)value, GenericHelper.getUnderlyingGenericClass(type));
 		}
 		
 		field.set(object, jsonValue);

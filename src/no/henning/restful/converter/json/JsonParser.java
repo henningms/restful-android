@@ -2,11 +2,17 @@ package no.henning.restful.converter.json;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import no.henning.restful.callback.Callback;
 import no.henning.restful.converter.json.utils.JsonParserUtil;
+import no.henning.restful.utils.GenericHelper;
+import no.henning.restful.utils.ProxyHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +46,7 @@ public class JsonParser
 		}
 		return array;
 	}
-	
+
 	public static <T> T parse(JSONObject jsonObject, Class<T> type)
 	{
 		if (jsonObject == null) return null;
@@ -93,13 +99,13 @@ public class JsonParser
 
 		return null;
 	}
-	
+
 	public static <T> T parse(String json, Class<T> type)
 	{
 		try
 		{
 			JSONObject jsonObject = new JSONObject(json);
-			
+
 			return parse(jsonObject, type);
 		}
 		catch (JSONException e)
@@ -107,7 +113,61 @@ public class JsonParser
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T parse(JSONObject jsonObject, Callback<?> callback)
+	{
+		Type callbackType = ProxyHelper.getCallbackType(callback);
+
+		return (T) parse(jsonObject, (Class<?>) callbackType);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T parse(JSONArray jsonArray, Callback<?> callback)
+	{
+		Type callbackType = ProxyHelper.getCallbackType(callback);
 		
+		if (GenericHelper.isCollection(callbackType))
+		{
+			Type type = GenericHelper.getUnderlyingGenericType((ParameterizedType) callbackType);
+			
+			return (T) parseCollection(jsonArray, (Class<?>) type);
+		}
+		else if (GenericHelper.isArray(callbackType))
+		{
+			Type type = GenericHelper.getUnderlyingGenericArrayType((GenericArrayType)callbackType);
+			
+			return (T) parseArray(jsonArray, (Class<?>) type);
+		}
+		
+		return null;
+	}
+	public static <T> T parse(String json, Callback<?> callback)
+	{
+		try
+		{
+			if (json.startsWith("["))
+			{
+				JSONArray jsonArray = new JSONArray(json);
+				
+				return parse(jsonArray, callback);
+
+			}
+			else
+			{
+				JSONObject jsonObject = new JSONObject(json);
+
+				return parse(jsonObject, callback);
+			}
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 }

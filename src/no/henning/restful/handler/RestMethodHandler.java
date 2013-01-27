@@ -2,15 +2,9 @@ package no.henning.restful.handler;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.callback.CallbackWrapper;
@@ -21,7 +15,6 @@ import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
 import no.henning.restful.http.status.RestHttpResponse;
 import no.henning.restful.model.Model;
-import no.henning.restful.service.RestService;
 import no.henning.restful.utils.GenericHelper;
 import no.henning.restful.utils.HttpHelper;
 import no.henning.restful.utils.ProxyHelper;
@@ -73,13 +66,13 @@ public class RestMethodHandler implements InvocationHandler
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());
 					
-					Object t = JsonParser.parse(response.getResponse(), (Class<?>)callbackType);
+					Object t = JsonParser.parse(response.getResponse(), callback);
 					
 					new CallbackWrapper(callback).success(t);
 					
 				}
 			});
 		
-		return "LOL";
+		return true;
 	}
 }

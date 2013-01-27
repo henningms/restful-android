@@ -1,8 +1,10 @@
 package no.henning.restful.utils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class GenericHelper
 		Log.d("restful",
 				"getRestServiceFromProxyMethod: Trying to retrieve what RestService "
 						+ method.getDeclaringClass().getSimpleName() + " uses");
-		
+
 		Class<? extends Model> model = getModelFromProxyMethod(method);
 
 		return getRestServiceFromModel(model);
@@ -74,42 +76,41 @@ public class GenericHelper
 
 		return annotation.value();
 	}
-	
-	
+
 	public static Url getUrlAnnotationFromClass(Class<?> clazz)
 	{
 		if (clazz == null) return null;
-		
+
 		Url urlAnnotation = clazz.getAnnotation(Url.class);
-		
+
 		return urlAnnotation;
 	}
-	
+
 	public static String getResourcePathFromModel(Class<? extends Model> model)
 	{
 		if (model == null) return null;
-		
+
 		Url urlAnnotation = getUrlAnnotationFromClass(model);
-		
-		if (urlAnnotation != null)
-			return urlAnnotation.value();
-		
-		// If Model hasn't specified a Url, we'll use the Model name as resource path
-		
+
+		if (urlAnnotation != null) return urlAnnotation.value();
+
+		// If Model hasn't specified a Url, we'll use the Model name as resource
+		// path
+
 		// TODO: This can't possibly be the way it's supposed to work
 		return model.getSimpleName().toLowerCase();
 	}
-	
+
 	public static Class<?> getUnderlyingType(Field field)
 	{
 		Class<?> fieldType = field.getType();
-		
-		if (isArray(fieldType))
-			return fieldType.getComponentType();
-		
+
+		if (isArray(fieldType)) return fieldType.getComponentType();
+
 		if (isCollection(fieldType))
-			return getUnderlyingGenericType((ParameterizedType) field.getGenericType());
-		
+			return getUnderlyingGenericClass((ParameterizedType) field
+					.getGenericType());
+
 		return fieldType;
 	}
 
@@ -117,29 +118,100 @@ public class GenericHelper
 	{
 		return type.getComponentType();
 	}
-	
-	public static Class<?> getUnderlyingGenericType(ParameterizedType type)
+
+	public static Class<?> getUnderlyingGenericClass(ParameterizedType type)
 	{
 		return (Class<?>) type.getActualTypeArguments()[0];
 	}
+
+	public static Type getUnderlyingGenericType(ParameterizedType type)
+	{
+		return type.getActualTypeArguments()[0];
+	}
+
+	public static Type[] getUnderlyingGenericTypes(ParameterizedType type)
+	{
+		return type.getActualTypeArguments();
+	}
 	
+	public static Type getUnderlyingGenericArrayType(GenericArrayType type)
+	{
+		return type.getGenericComponentType();
+	}
+
 	public static boolean isCollection(Class<?> type)
 	{
 		if (type == null) return false;
 		if (Collection.class.isAssignableFrom(type)) return true;
 		if (List.class.isAssignableFrom(type)) return true;
-		
+
 		// Map ain't no ordinary collection, shame on thee!
-		//if (Map.class.isAssignableFrom(type)) return true;
-		
-		return false;	
+		// if (Map.class.isAssignableFrom(type)) return true;
+
+		return false;
 	}
-	
+
+	public static boolean isCollection(Type type)
+	{
+		try
+		{
+			if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForArray") == type.getClass())
+			{
+				Log.d("restful", "Is not collection, but an array!");
+				
+				return false;
+			}
+		}
+		catch (ClassNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ParameterizedType pType = (ParameterizedType) type;
+
+		Log.d("restful",
+				"isCollection: Type is " + (Class<?>) pType.getRawType());
+		Log.d("restful",
+				"isCollection: Type is "
+						+ (Class<?>) pType.getActualTypeArguments()[0]);
+
+		return isCollection((Class<?>) pType.getRawType());
+	}
+
 	public static boolean isArray(Class<?> type)
 	{
 		if (type == null) return false;
 		if (type.isArray()) return true;
-		
+
 		return false;
+	}
+
+	public static boolean isArray(Type type)
+	{
+		try
+		{
+			if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForType") == type.getClass())
+			{
+				Log.d("restful", "Is not array, could be a collection or simple object!");
+				
+				return false;
+			}
+		}
+		catch (ClassNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		GenericArrayType pType = (GenericArrayType) type;
+
+		Log.d("restful",
+				"isArray: Type is " + (Class<?>) pType.getClass());
+		Log.d("restful",
+				"isArray: Type is "
+						+ (Class<?>) pType.getGenericComponentType());
+		
+		return true;
 	}
 }

@@ -1,10 +1,6 @@
 package no.henning.restful.model;
 
-import java.lang.reflect.Field;
-
 import org.apache.http.client.methods.HttpUriRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.util.Log;
 import no.henning.restful.callback.Callback;
@@ -26,7 +22,7 @@ public class Model implements DefaultRestActions
 	}
 
 	@Override
-	public void get(final Callback<Model> callback)
+	public <T> void get(final Callback<T> callback)
 	{
 		performRequest("GET", this, callback);
 	}
@@ -72,13 +68,13 @@ public class Model implements DefaultRestActions
 		delete(null);
 	}
 	
-	private void performRequest(String httpVerb, Model body, final Callback<Model> callback)
+	private <T> void performRequest(String httpVerb, Model body, final Callback<T> callback)
 	{
 		RestHttpRequestDetail detail = new RestHttpRequestDetail(this, httpVerb);
 
 		HttpUriRequest request = detail.buildRequest();
 		
-		final Model that = this;
+		final T that = (T) this;
 
 		HttpRestClient.request(request, new HttpRestClientResponseCallback()
 			{

@@ -9,7 +9,7 @@ public interface DefaultRestActions
 	 * GET methods
 	 */
 	public void get();
-	public void get(final Callback<Model> callback);
+	public <T> void get(final Callback<T> callback);
 	
 	/**
 	 * POST methods
