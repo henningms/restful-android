@@ -9,6 +9,8 @@ public interface DefaultRestActions
 	 * GET methods
 	 */
 	public void get();
+	public void get(Object id);
+	public <T> void get(Object id, final Callback<T> callback);
 	public <T> void get(final Callback<T> callback);
 	
 	/**
@@ -27,5 +29,7 @@ public interface DefaultRestActions
 	 * DELETE methods
 	 */
 	public void delete();
-	public void delete(final Callback<Model> callback);
+	public void delete(Object id);
+	public <T> void delete(Object id, final Callback<T> callback);
+	public <T> void delete(final Callback<T> callback);
 }

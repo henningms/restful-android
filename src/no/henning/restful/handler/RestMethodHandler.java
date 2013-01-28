@@ -13,8 +13,9 @@ import no.henning.restful.converter.json.JsonWriter;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
-import no.henning.restful.http.status.RestHttpResponse;
+import no.henning.restful.http.status.HttpRestResponse;
 import no.henning.restful.model.Model;
+import no.henning.restful.utils.CallbackHelper;
 import no.henning.restful.utils.GenericHelper;
 import no.henning.restful.utils.HttpHelper;
 import no.henning.restful.utils.ProxyHelper;
@@ -52,8 +53,8 @@ public class RestMethodHandler implements InvocationHandler
 		Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
 		String entityAsJsonString = JsonWriter.from(entityObject).toString();
 		
-		final Callback<?> callback = ProxyHelper.getCallbackArgument(arguments);
-		final Type callbackType = ProxyHelper.getCallbackType(callback);
+		final Callback<?> callback = CallbackHelper.getCallbackArgument(arguments);
+		final Type callbackType = CallbackHelper.getCallbackType(callback);
 		
 		HttpUriRequest httpRequest = new RestHttpRequestDetail(model, absolutePath, httpVerb, entityAsJsonString).buildRequest();
 		HttpRestClient.request(httpRequest, new HttpRestClientResponseCallback()
@@ -61,7 +62,7 @@ public class RestMethodHandler implements InvocationHandler
 				
 				@SuppressWarnings({ "unchecked", "rawtypes" })
 				@Override
-				public void onDone(RestHttpResponse response)
+				public void onDone(HttpRestResponse response)
 				{
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());

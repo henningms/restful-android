@@ -1,6 +1,6 @@
 package no.henning.restful.callback;
 
-import no.henning.restful.http.status.RestHttpResponse;
+import no.henning.restful.http.status.HttpRestResponse;
 
 public class CallbackWrapper<T>
 {
@@ -17,7 +17,7 @@ public class CallbackWrapper<T>
 		callback.onSuccess((T) object);
 	}
 	
-	public void error(RestHttpResponse response)
+	public void error(HttpRestResponse response)
 	{
 		callback.onError(response);
 	}

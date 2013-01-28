@@ -11,6 +11,7 @@ import java.util.List;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.converter.json.utils.JsonParserUtil;
+import no.henning.restful.utils.CallbackHelper;
 import no.henning.restful.utils.GenericHelper;
 import no.henning.restful.utils.ProxyHelper;
 
@@ -120,7 +121,7 @@ public class JsonParser
 	@SuppressWarnings("unchecked")
 	public static <T> T parse(JSONObject jsonObject, Callback<?> callback)
 	{
-		Type callbackType = ProxyHelper.getCallbackType(callback);
+		Type callbackType = CallbackHelper.getCallbackType(callback);
 
 		return (T) parse(jsonObject, (Class<?>) callbackType);
 	}
@@ -128,7 +129,7 @@ public class JsonParser
 	@SuppressWarnings("unchecked")
 	public static <T> T parse(JSONArray jsonArray, Callback<?> callback)
 	{
-		Type callbackType = ProxyHelper.getCallbackType(callback);
+		Type callbackType = CallbackHelper.getCallbackType(callback);
 		
 		if (GenericHelper.isCollection(callbackType))
 		{

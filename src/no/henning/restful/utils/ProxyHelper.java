@@ -157,26 +157,6 @@ public class ProxyHelper
 	 * @param arguments
 	 * @return
 	 */
-	public static Class<?> getCallbackClass(Callback<?> callback)
-	{
-		return (Class<?>) getCallbackType(callback);
-	}
-
-	public static Type getCallbackType(Callback<?> callback)
-	{
-		Type[] types = callback.getClass().getGenericInterfaces();
-		
-		Type callbackType = GenericHelper
-				.getUnderlyingGenericType((ParameterizedType) types[0]);
-
-		
-		return callbackType;
-	}
-
-	public static Callback<?> getCallbackArgument(Object[] arguments)
-	{
-		return (Callback<?>) arguments[arguments.length - 1];
-	}
 
 	public static Object getEntityObjectFromProxyMethod(Method method,
 			Object[] arguments)

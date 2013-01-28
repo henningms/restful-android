@@ -10,6 +10,7 @@ import no.henning.restful.annotation.BasicAuthenticateWith;
 import no.henning.restful.auth.BasicAuthentication;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.method.HttpDelete;
+import no.henning.restful.http.status.HttpRestResponse;
 import no.henning.restful.model.Model;
 import no.henning.restful.service.RestService;
 import no.henning.restful.service.annotation.DELETE;
@@ -210,6 +211,19 @@ public class HttpHelper
 		BasicAuthenticateWith authentication = clazz.getAnnotation(BasicAuthenticateWith.class);
 
 		return authentication == null ? false : true;
+	}
+	
+	/**
+	 * 
+	 * HTTP RESPONSE
+	 * 
+	 */
+	
+	public static boolean isSuccessfulResponse(HttpRestResponse response)
+	{
+		int statusCode = response.getStatusCode();
+		
+		return statusCode >= 200 && statusCode < 300;
 	}
 
 }

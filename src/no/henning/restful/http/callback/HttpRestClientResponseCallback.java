@@ -1,8 +1,8 @@
 package no.henning.restful.http.callback;
 
-import no.henning.restful.http.status.RestHttpResponse;
+import no.henning.restful.http.status.HttpRestResponse;
 
 public interface HttpRestClientResponseCallback
 {
-	void onDone(RestHttpResponse response);
+	void onDone(HttpRestResponse response);
 }

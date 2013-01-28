@@ -9,9 +9,10 @@ import no.henning.restful.converter.json.JsonWriter;
 import no.henning.restful.http.HttpRestClient;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
-import no.henning.restful.http.status.RestHttpResponse;
+import no.henning.restful.http.status.HttpRestResponse;
 import no.henning.restful.model.interfaces.DefaultRestActions;
 import no.henning.restful.model.util.ModelUtil;
+import no.henning.restful.utils.HttpHelper;
 
 public class Model implements DefaultRestActions
 {
@@ -34,23 +35,37 @@ public class Model implements DefaultRestActions
 	}
 
 	@Override
+	public void get(Object id)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public <T> void get(Object id, Callback<T> callback)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void save(Callback<Model> callback)
 	{
 		performRequest("POST", this, callback);
 	}
-	
+
 	@Override
 	public void save()
 	{
 		save(null);
 	}
-	
+
 	@Override
 	public void update(Callback<Model> callback)
 	{
 		performRequest("PUT", this, callback);
 	}
-	
+
 	@Override
 	public void update()
 	{
@@ -58,51 +73,80 @@ public class Model implements DefaultRestActions
 	}
 
 	@Override
-	public void delete(Callback<Model> callback)
-	{
-		performRequest("DELETE", this, callback);
-	}
-	@Override
 	public void delete()
 	{
 		delete(null);
 	}
-	
+
+	@Override
+	public void delete(Object id)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public <T> void delete(Object id, Callback<T> callback)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public <T> void delete(Callback<T> callback)
+	{
+		performRequest("DELETE", this, callback);
+	}
+
 	@SuppressWarnings("unchecked")
-	private <T> void performRequest(String httpVerb, Model body, final Callback<T> callback)
+	private <T> void performRequest(String httpVerb, Model body,
+			final Callback<T> callback)
 	{
 		RestHttpRequestDetail detail = new RestHttpRequestDetail(this, httpVerb);
 
 		HttpUriRequest request = detail.buildRequest();
-		
+
 		final T that = (T) this;
 
 		HttpRestClient.request(request, new HttpRestClientResponseCallback()
 			{
 
 				@Override
-				public void onDone(RestHttpResponse response)
+				public void onDone(HttpRestResponse response)
 				{
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());
 
-					if (response.getStatusCode() >= 200 && response.getStatusCode() < 300)
+					if (HttpHelper.isSuccessfulResponse(response))
+					{
+						parseResponse(response, callback);
+					}
+					
+					if (response.getStatusCode() >= 200
+							&& response.getStatusCode() < 300)
 					{
 						// Replace values with JSON String ;)
-						updateValues(response.getResponse());
 						
-						if (callback != null)
-							callback.onSuccess(that);
+
+						if (callback != null) callback.onSuccess(that);
 					}
 					else
 					{
-						if (callback != null)
-							callback.onError(response);
+						if (callback != null) callback.onError(response);
 					}
 				}
 			});
 	}
 
+	private <T> void parseResponse(HttpRestResponse response, final Callback<T> callback)
+	{
+		
+		// If Callback is an object and can be cast to Model, try to
+		// update values
+		
+		updateValues(response.getResponse());
+	}
+	
 	private void updateValues(String json)
 	{
 		Model model = JsonParser.parse(json, this.getClass());
@@ -113,7 +157,7 @@ public class Model implements DefaultRestActions
 	{
 		ModelUtil.replaceValues(fromModel, this);
 	}
-	
+
 	@Override
 	public String toString()
 	{

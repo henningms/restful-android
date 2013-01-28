@@ -1,12 +1,12 @@
 package no.henning.restful.http.status;
 
-public class RestHttpResponse
+public class HttpRestResponse
 {
 	private final int statusCode;
 	private final String statusReason;
 	private final String response;
 	
-	public RestHttpResponse(int statusCode, String statusReason, String response)
+	public HttpRestResponse(int statusCode, String statusReason, String response)
 	{
 		this.statusCode = statusCode;
 		this.statusReason = statusReason;

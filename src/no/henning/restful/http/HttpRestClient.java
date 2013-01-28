@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.http.callback.HttpRestClientResponseCallback;
-import no.henning.restful.http.status.RestHttpResponse;
+import no.henning.restful.http.status.HttpRestResponse;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -25,7 +25,7 @@ import org.apache.http.util.EntityUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, RestHttpResponse>
+public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, HttpRestResponse>
 {
 	private final static DefaultHttpClient client = new DefaultHttpClient();
 	
@@ -37,7 +37,7 @@ public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, RestHttpResp
 	}
 	
 	@Override
-	protected RestHttpResponse doInBackground(HttpUriRequest... requests)
+	protected HttpRestResponse doInBackground(HttpUriRequest... requests)
 	{
 		try
 		{
@@ -47,7 +47,7 @@ public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, RestHttpResp
 			
 			StatusLine responseStatusLine = response.getStatusLine();
 
-			return new RestHttpResponse(responseStatusLine.getStatusCode(),
+			return new HttpRestResponse(responseStatusLine.getStatusCode(),
 					responseStatusLine.getReasonPhrase(), responseAsString);
 		}
 		catch (ClientProtocolException e)
@@ -65,7 +65,7 @@ public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, RestHttpResp
 	}
 	
 	@Override
-	protected void onPostExecute(RestHttpResponse response)
+	protected void onPostExecute(HttpRestResponse response)
 	{
 		if (callback == null) return;
 		
