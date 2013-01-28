@@ -7,6 +7,7 @@ public class BasicAuthentication
 	private static String username;
 	private static String password;
 	
+	@SuppressWarnings("unused")
 	private static String encodedString;
 	
 	private static void encodeUsernameAndPassword()

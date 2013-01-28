@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 
-import no.henning.restful.annotation.Authenticate;
+import no.henning.restful.annotation.BasicAuthenticateWith;
 import no.henning.restful.auth.BasicAuthentication;
 import no.henning.restful.http.builder.RestHttpRequestDetail;
 import no.henning.restful.http.method.HttpDelete;
@@ -139,7 +139,7 @@ public class HttpHelper
 		
 		if (modelHasBasicAuthentication(model))
 		{
-			basicAuthentication = getBasicAuthenticationClass(model.getAnnotation(Authenticate.class));
+			basicAuthentication = getBasicAuthenticationClass(model.getAnnotation(BasicAuthenticateWith.class));
 		}
 		else
 		{
@@ -148,7 +148,7 @@ public class HttpHelper
 			
 			if (!restServiceHasBasicAuthentication(restService)) return null;
 			
-			basicAuthentication = getBasicAuthenticationClass(restService.getAnnotation(Authenticate.class));
+			basicAuthentication = getBasicAuthenticationClass(restService.getAnnotation(BasicAuthenticateWith.class));
 		}
 		
 		if (basicAuthentication == null) return null;
@@ -157,7 +157,7 @@ public class HttpHelper
 		return getBasicAuthenticationFromAuthenticationClass(basicAuthentication);
 	}
 
-	public static Class<? extends BasicAuthentication> getBasicAuthenticationClass(Authenticate annotation)
+	public static Class<? extends BasicAuthentication> getBasicAuthenticationClass(BasicAuthenticateWith annotation)
 	{
 		if (annotation == null) return null;
 		
@@ -207,7 +207,7 @@ public class HttpHelper
 	
 	public static boolean classHasBasicAuthentication(Class<?> clazz)
 	{
-		Authenticate authentication = clazz.getAnnotation(Authenticate.class);
+		BasicAuthenticateWith authentication = clazz.getAnnotation(BasicAuthenticateWith.class);
 
 		return authentication == null ? false : true;
 	}

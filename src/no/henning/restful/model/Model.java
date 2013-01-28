@@ -68,6 +68,7 @@ public class Model implements DefaultRestActions
 		delete(null);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private <T> void performRequest(String httpVerb, Model body, final Callback<T> callback)
 	{
 		RestHttpRequestDetail detail = new RestHttpRequestDetail(this, httpVerb);
@@ -85,12 +86,19 @@ public class Model implements DefaultRestActions
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());
 
-					// Replace values with JSON String ;)
-					updateValues(response.getResponse());
-					
-					if (callback == null) return;
-					
-					callback.onSuccess(that);
+					if (response.getStatusCode() >= 200 && response.getStatusCode() < 300)
+					{
+						// Replace values with JSON String ;)
+						updateValues(response.getResponse());
+						
+						if (callback != null)
+							callback.onSuccess(that);
+					}
+					else
+					{
+						if (callback != null)
+							callback.onError(response);
+					}
 				}
 			});
 	}

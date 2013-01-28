@@ -1,6 +1,6 @@
 package no.henning.restful.callback;
 
-import android.util.Log;
+import no.henning.restful.http.status.RestHttpResponse;
 
 public class CallbackWrapper<T>
 {
@@ -17,9 +17,8 @@ public class CallbackWrapper<T>
 		callback.onSuccess((T) object);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void error(Object object)
+	public void error(RestHttpResponse response)
 	{
-		callback.onError((T) object);
+		callback.onError(response);
 	}
 }

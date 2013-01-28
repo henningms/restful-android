@@ -66,9 +66,16 @@ public class RestMethodHandler implements InvocationHandler
 					// TODO Auto-generated method stub
 					Log.d("restful", "Response: " + response.getResponse());
 					
-					Object t = JsonParser.parse(response.getResponse(), callback);
 					
-					new CallbackWrapper(callback).success(t);
+					if (response.getStatusCode() >= 200 && response.getStatusCode() < 300)
+					{	
+						Object t = JsonParser.parse(response.getResponse(), callback);
+						new CallbackWrapper(callback).success(t);
+					}
+					else
+					{
+						new CallbackWrapper(callback).error(response);
+					}
 					
 				}
 			});

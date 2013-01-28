@@ -9,7 +9,7 @@ import no.henning.restful.auth.BasicAuthentication;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Authenticate
+public @interface BasicAuthenticateWith
 {
 	Class<? extends BasicAuthentication> value();
 }
