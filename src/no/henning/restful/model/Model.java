@@ -1,5 +1,7 @@
 package no.henning.restful.model;
 
+import java.lang.reflect.Type;
+
 import org.apache.http.client.methods.HttpUriRequest;
 
 import android.util.Log;
@@ -12,6 +14,8 @@ import no.henning.restful.http.callback.HttpRestClientResponseCallback;
 import no.henning.restful.http.status.HttpRestResponse;
 import no.henning.restful.model.interfaces.DefaultRestActions;
 import no.henning.restful.model.util.ModelUtil;
+import no.henning.restful.utils.CallbackHelper;
+import no.henning.restful.utils.GenericHelper;
 import no.henning.restful.utils.HttpHelper;
 
 public class Model implements DefaultRestActions
@@ -119,19 +123,14 @@ public class Model implements DefaultRestActions
 
 					if (HttpHelper.isSuccessfulResponse(response))
 					{
+						Log.d("restful", "Request was successful!");
 						parseResponse(response, callback);
-					}
-					
-					if (response.getStatusCode() >= 200
-							&& response.getStatusCode() < 300)
-					{
-						// Replace values with JSON String ;)
-						
-
-						if (callback != null) callback.onSuccess(that);
 					}
 					else
 					{
+						Log.d("restful", "Something happened with the request..");
+						Log.d("restful", "" + response.getStatusCode() + ": " + response.getStatusReason());
+						
 						if (callback != null) callback.onError(response);
 					}
 				}
@@ -140,11 +139,34 @@ public class Model implements DefaultRestActions
 
 	private <T> void parseResponse(HttpRestResponse response, final Callback<T> callback)
 	{
+		// If callback is null, let's assume we can update this model's
+		// values with the response and head on out of here!
 		
-		// If Callback is an object and can be cast to Model, try to
-		// update values
+		if (callback == null) 
+		{
+			updateValues(response.getResponse());
+			return;
+		}
 		
-		updateValues(response.getResponse());
+		// Retrieves the type of the callback: Callback<Type>
+		Type callbackType = CallbackHelper.getCallbackType(callback);
+		
+		if (GenericHelper.isCollection(callbackType)
+				|| GenericHelper.isArray(callbackType))
+		{
+			T parsedObjects = JsonParser.parse(response.getResponse(), callback);
+			
+			callback.onSuccess(parsedObjects);
+		}
+		else
+		{
+			// If Callback is an object and can be cast to Model, try to
+			// update values
+			
+			if (callbackType.getClass().isInstance(this))
+				updateValues(response.getResponse());
+		}
+		
 	}
 	
 	private void updateValues(String json)

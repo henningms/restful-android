@@ -150,7 +150,8 @@ public class JsonParser
 	{
 		try
 		{
-			if (json.startsWith("["))
+			// TODO: IS THIS OK!?
+			if (json.trim().startsWith("["))
 			{
 				JSONArray jsonArray = new JSONArray(json);
 				

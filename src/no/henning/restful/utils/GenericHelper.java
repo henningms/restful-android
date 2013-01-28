@@ -153,11 +153,19 @@ public class GenericHelper
 
 	public static boolean isCollection(Type type)
 	{
+		Log.d("restful", "isCollection: Checking " + type);
+		
 		try
 		{
-			if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForArray") == type.getClass())
+			if (Class.forName("java.lang.Class") == type.getClass())
 			{
-				Log.d("restful", "Is not collection, but an array!");
+				Log.d("restful", "isCollection: Is not a special case, forwarding check..");
+				
+				return isCollection((Class<?>) type);
+			}
+			else if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForArray") == type.getClass())
+			{
+				Log.d("restful", "isCollection: Is not collection, but an array!");
 				
 				return false;
 			}
@@ -189,11 +197,19 @@ public class GenericHelper
 
 	public static boolean isArray(Type type)
 	{
+		Log.d("restful", "isCollection: Checking " + type);
+		
 		try
 		{
-			if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForType") == type.getClass())
+			if (Class.forName("java.lang.Class") == type.getClass())
 			{
-				Log.d("restful", "Is not array, could be a collection or simple object!");
+				Log.d("restful", "isArray: Is not a special case, forwarding check..");
+				
+				return isArray((Class<?>) type);
+			}
+			else if (Class.forName("org.apache.harmony.luni.lang.reflect.ImplForType") == type.getClass())
+			{
+				Log.d("restful", "isArray: Is not array, could be a collection or simple object!");
 				
 				return false;
 			}
