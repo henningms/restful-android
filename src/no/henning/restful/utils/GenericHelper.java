@@ -11,6 +11,8 @@ import java.util.Map;
 
 import android.util.Log;
 
+import no.henning.restful.callback.Callback;
+import no.henning.restful.converter.json.utils.TypeReference;
 import no.henning.restful.model.Model;
 import no.henning.restful.model.annotation.BelongsTo;
 import no.henning.restful.model.annotation.UsesRestService;
@@ -197,7 +199,7 @@ public class GenericHelper
 
 	public static boolean isArray(Type type)
 	{
-		Log.d("restful", "isCollection: Checking " + type);
+		Log.d("restful", "isArray: Checking " + type);
 		
 		try
 		{
@@ -229,5 +231,15 @@ public class GenericHelper
 						+ (Class<?>) pType.getGenericComponentType());
 		
 		return true;
+	}
+	
+	public static Type getTypeReferenceType(TypeReference<?> type)
+	{
+		Type[] types = type.getClass().getGenericInterfaces();
+
+		Type genericType = GenericHelper
+				.getUnderlyingGenericType((ParameterizedType) types[0]);
+
+		return genericType;
 	}
 }

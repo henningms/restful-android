@@ -11,6 +11,7 @@ import java.util.List;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.converter.json.utils.JsonParserUtil;
+import no.henning.restful.converter.json.utils.TypeReference;
 import no.henning.restful.utils.CallbackHelper;
 import no.henning.restful.utils.GenericHelper;
 import no.henning.restful.utils.ProxyHelper;
@@ -24,7 +25,7 @@ import android.util.Log;
 public class JsonParser
 {
 	public static <T> Collection<T> parseCollection(JSONArray jsonArray,
-			Class<T> type)
+			Class<T> type) throws InstantiationException, IllegalAccessException, JSONException
 	{
 		Collection<T> collection = new ArrayList<T>();
 
@@ -37,7 +38,7 @@ public class JsonParser
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T[] parseArray(JSONArray jsonArray, Class<T> type)
+	public static <T> T[] parseArray(JSONArray jsonArray, Class<T> type) throws InstantiationException, IllegalAccessException, JSONException
 	{
 		T[] array = (T[]) Array.newInstance(type, jsonArray.length());
 
@@ -49,127 +50,123 @@ public class JsonParser
 	}
 
 	public static <T> T parse(JSONObject jsonObject, Class<T> type)
+			throws InstantiationException, IllegalAccessException,
+			JSONException
 	{
 		if (jsonObject == null) return null;
 
-		try
+		Log.d("restful", "Json parsing: " + jsonObject.toString());
+
+		Log.d("restful", "Json parsing: Type is " + type);
+		// Create a new instance of this type
+		T returnObj = (T) type.newInstance();
+
+		Log.d("restful", "Json parsing: Type is " + returnObj);
+		// Lets populate some fields!
+		List<Field> validFields = JsonParserUtil
+				.getJsonFieldsToPopulate(returnObj.getClass());
+
+		for (Field field : validFields)
 		{
-			Log.d("restful", "Json parsing: Type is " + type);
-			// Create a new instance of this type
-			T returnObj = (T) type.newInstance();
+			field.setAccessible(true);
 
-			// Lets populate some fields!
-			List<Field> validFields = JsonParserUtil
-					.getJsonFieldsToPopulate(returnObj.getClass());
+			String jsonFieldName = JsonParserUtil
+					.getJsonFieldNameFromClassField(field);
 
-			for (Field field : validFields)
+			if (jsonObject.isNull(jsonFieldName)) continue;
+
+			Class<?> fieldClass = field.getType();
+
+			Object jsonValue = jsonObject.get(jsonFieldName);
+
+			Log.d("restful", "JsonParser: Field " + field.getName()
+					+ " - Class: " + fieldClass.getName());
+			Log.d("restful",
+					"JsonParser: Json Value Class: " + jsonValue.getClass());
+
+			if (jsonValue instanceof JSONObject)
 			{
-				field.setAccessible(true);
-
-				String jsonFieldName = JsonParserUtil
-						.getJsonFieldNameFromClassField(field);
-
-				if (jsonObject.isNull(jsonFieldName)) continue;
-
-				Class<?> fieldClass = field.getType();
-
-				Object jsonValue = jsonObject.get(jsonFieldName);
-
-				Log.d("restful",
-						"JsonParser: Field Class: " + fieldClass.getName());
-				Log.d("restful",
-						"JsonParser: Json Value Class: " + jsonValue.getClass());
-
-				if (JsonParserUtil.isJsonArray(jsonValue))
-				{
-					JsonParserUtil.castJsonArrayValue(field, returnObj,
-							jsonValue);
-				}
-				else
-				{
-					JsonParserUtil.castJsonValue(field, returnObj, jsonValue);
-				}
+				JsonParserUtil.castJsonObjectValue(field, returnObj, jsonValue);
 			}
-
-			return returnObj;
-		}
-		catch (Exception ex)
-		{
-			Log.d("restful", "Json parsing: " + ex.getMessage());
-		}
-
-		return null;
-	}
-
-	public static <T> T parse(String json, Class<T> type)
-	{
-		try
-		{
-			JSONObject jsonObject = new JSONObject(json);
-
-			return parse(jsonObject, type);
-		}
-		catch (JSONException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T parse(JSONObject jsonObject, Callback<?> callback)
-	{
-		Type callbackType = CallbackHelper.getCallbackType(callback);
-
-		return (T) parse(jsonObject, (Class<?>) callbackType);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T parse(JSONArray jsonArray, Callback<?> callback)
-	{
-		Type callbackType = CallbackHelper.getCallbackType(callback);
-		
-		if (GenericHelper.isCollection(callbackType))
-		{
-			Type type = GenericHelper.getUnderlyingGenericType((ParameterizedType) callbackType);
-			
-			return (T) parseCollection(jsonArray, (Class<?>) type);
-		}
-		else if (GenericHelper.isArray(callbackType))
-		{
-			Type type = GenericHelper.getUnderlyingGenericArrayType((GenericArrayType)callbackType);
-			
-			return (T) parseArray(jsonArray, (Class<?>) type);
-		}
-		
-		return null;
-	}
-	public static <T> T parse(String json, Callback<?> callback)
-	{
-		try
-		{
-			// TODO: IS THIS OK!?
-			if (json.trim().startsWith("["))
+			else if (JsonParserUtil.isJsonArray(jsonValue))
 			{
-				JSONArray jsonArray = new JSONArray(json);
-				
-				return parse(jsonArray, callback);
-
+				JsonParserUtil.castJsonArrayValue(field, returnObj, jsonValue);
 			}
 			else
 			{
-				JSONObject jsonObject = new JSONObject(json);
-
-				return parse(jsonObject, callback);
+				JsonParserUtil.castJsonValue(field, returnObj, jsonValue);
 			}
 		}
-		catch (JSONException e)
+
+		return returnObj;
+	}
+
+	public static <T> T parse(String json, Class<T> type)
+			throws InstantiationException, IllegalAccessException, JSONException
+	{
+		JSONObject jsonObject = new JSONObject(json);
+
+		return parse(jsonObject, type);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T parseGenericType(JSONObject jsonObject, Type type) throws InstantiationException, IllegalAccessException, JSONException
+	{
+		return (T) parse(jsonObject, (Class<?>) type);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T parseGenericType(JSONArray jsonArray, Type type) throws InstantiationException, IllegalAccessException, JSONException
+	{
+		if (GenericHelper.isCollection(type))
 		{
-			e.printStackTrace();
+			Type collectionType = GenericHelper
+					.getUnderlyingGenericType((ParameterizedType) type);
+
+			return (T) parseCollection(jsonArray, (Class<?>) collectionType);
+		}
+		else if (GenericHelper.isArray(type))
+		{
+			Type arrayType = GenericHelper
+					.getUnderlyingGenericArrayType((GenericArrayType) type);
+
+			return (T) parseArray(jsonArray, (Class<?>) arrayType);
 		}
 
 		return null;
+	}
+
+	public static <T> T parse(String json, Type type) throws JSONException, InstantiationException, IllegalAccessException
+	{
+		// TODO: IS THIS OK!?
+		if (json.trim().startsWith("["))
+		{
+			JSONArray jsonArray = new JSONArray(json);
+
+			return parseGenericType(jsonArray, type);
+
+		}
+		else
+		{
+			JSONObject jsonObject = new JSONObject(json);
+
+			return parseGenericType(jsonObject, type);
+		}
+	}
+
+	public static <T> T parse(String json, TypeReference<?> type)
+			throws JSONException, InstantiationException, IllegalAccessException
+	{
+		Type genericType = GenericHelper.getTypeReferenceType(type);
+
+		return parse(json, genericType);
+	}
+
+	public static <T> T parse(String json, Callback<?> callback)
+			throws JSONException, InstantiationException, IllegalAccessException
+	{
+		Type genericType = CallbackHelper.getCallbackType(callback);
+
+		return parse(json, genericType);
 	}
 }

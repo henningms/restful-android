@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.json.JSONException;
 
 import no.henning.restful.callback.Callback;
 import no.henning.restful.callback.CallbackWrapper;
@@ -70,8 +71,27 @@ public class RestMethodHandler implements InvocationHandler
 					
 					if (response.getStatusCode() >= 200 && response.getStatusCode() < 300)
 					{	
-						Object t = JsonParser.parse(response.getResponse(), callback);
-						new CallbackWrapper(callback).success(t);
+						try
+						{
+							Object t = JsonParser.parse(response.getResponse(), callback);
+							new CallbackWrapper(callback).success(t);
+						}
+						catch (JSONException e)
+						{
+							// TODO Auto-generated catch block
+							new CallbackWrapper(callback).error(response);
+						}
+						catch (InstantiationException e)
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						catch (IllegalAccessException e)
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 					}
 					else
 					{

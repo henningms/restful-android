@@ -3,6 +3,7 @@ package no.henning.restful.model;
 import java.lang.reflect.Type;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.json.JSONException;
 
 import android.util.Log;
 import no.henning.restful.callback.Callback;
@@ -128,51 +129,106 @@ public class Model implements DefaultRestActions
 					}
 					else
 					{
-						Log.d("restful", "Something happened with the request..");
-						Log.d("restful", "" + response.getStatusCode() + ": " + response.getStatusReason());
-						
+						Log.d("restful",
+								"Something happened with the request..");
+						Log.d("restful", "" + response.getStatusCode() + ": "
+								+ response.getStatusReason());
+
 						if (callback != null) callback.onError(response);
 					}
 				}
 			});
 	}
 
-	private <T> void parseResponse(HttpRestResponse response, final Callback<T> callback)
+	@SuppressWarnings("unchecked")
+	private <T> void parseResponse(HttpRestResponse response,
+			final Callback<T> callback)
 	{
 		// If callback is null, let's assume we can update this model's
 		// values with the response and head on out of here!
-		
-		if (callback == null) 
+
+		if (callback == null)
 		{
+			Log.d("restful",
+					"parseResponse: Callback was empty, trying to update model's values with response");
+
 			updateValues(response.getResponse());
 			return;
 		}
-		
+
 		// Retrieves the type of the callback: Callback<Type>
 		Type callbackType = CallbackHelper.getCallbackType(callback);
-		
+
 		if (GenericHelper.isCollection(callbackType)
 				|| GenericHelper.isArray(callbackType))
 		{
-			T parsedObjects = JsonParser.parse(response.getResponse(), callback);
-			
-			callback.onSuccess(parsedObjects);
+			Log.d("restful",
+					"parseResponse: Callback type was an array or a collection as return type, trying to parse");
+
+			try
+			{
+				T parsedObjects = JsonParser.parse(response.getResponse(),
+						callback);
+				callback.onSuccess(parsedObjects);
+			}
+			catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (InstantiationException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (IllegalAccessException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 		else
 		{
 			// If Callback is an object and can be cast to Model, try to
 			// update values
-			
-			if (callbackType.getClass().isInstance(this))
+			Log.d("restful", "parseResponse: Callback type: " + callbackType);
+
+			if (((Class<?>) callbackType).isInstance(this))
+			{
+				Log.d("restful",
+						"parseResponse: Callback type was a single entity, trying to update values");
 				updateValues(response.getResponse());
+
+				callback.onSuccess((T) this);
+			}
 		}
-		
+
 	}
-	
+
 	private void updateValues(String json)
 	{
-		Model model = JsonParser.parse(json, this.getClass());
-		updateValues(model);
+		try
+		{
+			Model model = JsonParser.parse(json, this.getClass());
+			updateValues(model);
+		}
+		catch (InstantiationException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (JSONException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	private void updateValues(Model fromModel)

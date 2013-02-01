@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.util.Log;
 
@@ -76,7 +78,7 @@ public class JsonParserUtil
 		return value instanceof JSONArray;
 	}
 	
-	public static boolean castJsonArrayValue(Field field, Object object, Object value) throws IllegalArgumentException, IllegalAccessException
+	public static boolean castJsonArrayValue(Field field, Object object, Object value) throws IllegalArgumentException, IllegalAccessException, InstantiationException, JSONException
 	{
 		Class<?> fieldClass = field.getType();
 		
@@ -91,6 +93,21 @@ public class JsonParserUtil
 			ParameterizedType type = (ParameterizedType)field.getGenericType();
 			jsonValue = JsonParser.parseCollection((JSONArray)value, GenericHelper.getUnderlyingGenericClass(type));
 		}
+		
+		field.set(object, jsonValue);
+		
+		return jsonValue == null;
+	}
+	
+	public static boolean castJsonObjectValue(Field field, Object object, Object value) throws IllegalArgumentException, IllegalAccessException, InstantiationException, JSONException
+	{
+		if (!(value instanceof JSONObject)) return false;
+		
+		Class<?> fieldClass = field.getType();
+		
+		Object jsonValue = null;
+		
+		jsonValue = JsonParser.parse((JSONObject)value, fieldClass);
 		
 		field.set(object, jsonValue);
 		
