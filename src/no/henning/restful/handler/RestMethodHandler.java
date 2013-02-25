@@ -51,8 +51,10 @@ public class RestMethodHandler implements InvocationHandler
 		
 		String absolutePath = path + queryPath;
 		
-		Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
-		String entityAsJsonString = JsonWriter.from(entityObject).toString();
+		//Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
+		String entityAsJsonString = null;
+		
+		//JsonWriter.from(entityObject).toString();
 		
 		final Callback<?> callback = CallbackHelper.getCallbackArgument(arguments);
 		final Type callbackType = CallbackHelper.getCallbackType(callback);
