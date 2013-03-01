@@ -3,11 +3,13 @@ package no.henning.restful.http.builder;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import no.henning.restful.converter.json.JsonWriter;
@@ -81,7 +83,7 @@ public class RestHttpRequestDetail
 		{
 
 		}
-
+		
 		return request;
 	}
 
@@ -93,8 +95,22 @@ public class RestHttpRequestDetail
 	private void addRestHeaders(HttpUriRequest request)
 	{
 		request.setHeader("User-Agent", "Android Restful");
-		request.setHeader("Content-Type", "application/json");
+		
+		if (isNotGetOrDeleteRequest())
+			request.setHeader("Content-Type", "application/json");
+		
 		request.setHeader("Accept", "application/json");
+	}
+	
+	@SuppressLint("DefaultLocale")
+	private boolean isNotGetOrDeleteRequest()
+	{
+		String methodUppercased = requestMethod.toUpperCase();
+		
+		if (methodUppercased == "GET")
+			return false;
+		
+		return true;
 	}
 
 	private void addBasicAuthentication(HttpUriRequest request)

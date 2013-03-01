@@ -45,16 +45,22 @@ public class RestMethodHandler implements InvocationHandler
 		
 		Log.d("restful", "RestMethodHandler: Getting what HTTP verb to use");
 		String httpVerb = HttpHelper.getHttpRequestVerbFromProxyMethod(method);
+		Log.d("restful", "RestMethodHandler: " + httpVerb + " HTTP Verb");
 		
 		String queryPath = ProxyHelper.getProxyQueryPath(method, arguments);
 		Log.d("restful", "RestMethodHandler: Full path: " + path + queryPath);
 		
 		String absolutePath = path + queryPath;
 		
-		//Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
+		Object entityObject = ProxyHelper.getEntityObjectFromProxyMethod(method, arguments);
 		String entityAsJsonString = null;
 		
-		//JsonWriter.from(entityObject).toString();
+		if (entityObject != null)
+		{
+			entityAsJsonString = JsonWriter.from(entityObject).toString();
+			
+			Log.d("restful", "RestMethodHandler: Post body (JSON): " + entityAsJsonString);
+		}
 		
 		final Callback<?> callback = CallbackHelper.getCallbackArgument(arguments);
 		final Type callbackType = CallbackHelper.getCallbackType(callback);
