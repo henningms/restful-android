@@ -25,55 +25,46 @@ import org.apache.http.util.EntityUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, HttpRestResponse>
-{
+public class HttpRestClient extends AsyncTask<HttpUriRequest, Void, HttpRestResponse> {
 	private final static DefaultHttpClient client = new DefaultHttpClient();
-	
+
 	private HttpRestClientResponseCallback callback;
-	
-	public HttpRestClient(HttpRestClientResponseCallback callback)
-	{
+
+	public HttpRestClient(HttpRestClientResponseCallback callback) {
 		this.callback = callback;
 	}
-	
+
 	@Override
-	protected HttpRestResponse doInBackground(HttpUriRequest... requests)
-	{
-		try
-		{
+	protected HttpRestResponse doInBackground(HttpUriRequest... requests) {
+		try {
 			HttpResponse response = client.execute(requests[0]);
-			String responseAsString = EntityUtils
-					.toString(response.getEntity());
-			
+
+			String responseAsString = response.getEntity() == null ? "{}" : EntityUtils.toString(response.getEntity());
+
 			StatusLine responseStatusLine = response.getStatusLine();
 
-			return new HttpRestResponse(responseStatusLine.getStatusCode(),
-					responseStatusLine.getReasonPhrase(), responseAsString);
-		}
-		catch (ClientProtocolException e)
-		{
+			return new HttpRestResponse(responseStatusLine.getStatusCode(), responseStatusLine.getReasonPhrase(),
+					responseAsString);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
 		return null;
 	}
-	
+
 	@Override
-	protected void onPostExecute(HttpRestResponse response)
-	{
-		if (callback == null) return;
-		
+	protected void onPostExecute(HttpRestResponse response) {
+		if (callback == null)
+			return;
+
 		callback.onDone(response);
 	}
 
-	public static void request(HttpUriRequest request, HttpRestClientResponseCallback callback)
-	{
+	public static void request(HttpUriRequest request, HttpRestClientResponseCallback callback) {
 		new HttpRestClient(callback).execute(request);
 	}
 }
