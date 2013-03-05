@@ -192,7 +192,7 @@ public class Model implements DefaultRestActions {
 		return JsonWriter.from(this).toString();
 	}
 
-	private HttpRestResponse parseResponseError(HttpRestResponse response) {
+	public static HttpRestResponse parseResponseError(HttpRestResponse response) {
 		try {
 			ResponseError error = JsonParser.parse(response.getResponse(), ResponseError.class);
 			HttpRestResponse newResponse = new HttpRestResponse(response.getStatusCode(), response.getStatusReason(),
